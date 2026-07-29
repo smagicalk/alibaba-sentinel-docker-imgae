@@ -1,11 +1,11 @@
-FROM amd64/buildpack-deps:buster-curl as installer
+FROM amd64/buildpack-deps:buster-curl AS installer
 
 ARG SENTINEL_VERSION=1.8.10
 
 RUN set -x \
     && curl -SL --output /home/sentinel-dashboard.jar https://github.com/alibaba/Sentinel/releases/download/${SENTINEL_VERSION}/sentinel-dashboard-${SENTINEL_VERSION}.jar
 
-FROM openjdk:8-jre-slim
+FROM eclipse-temurin:8-jre-jammy
 
 # 时区修复，避免日志时间差
 ENV TZ=Asia/Shanghai
