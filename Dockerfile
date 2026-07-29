@@ -20,14 +20,8 @@ ENV DASHBOARD_SERVER=localhost:8080
 ENV DASH_USER=admin
 ENV DASH_PASS=Admin@123456
 
-# JAVA_OPTS通过变量拼接，无需手动改启动命令
-ENV JAVA_OPTS="-Dserver.port=${SERVER_PORT} \
--Dcsp.sentinel.dashboard.server=${DASHBOARD_SERVER} \
--Dsentinel.dashboard.auth.username=${DASH_USER} \
--Dsentinel.dashboard.auth.password=${DASH_PASS} \
--Dfile.encoding=UTF-8 \
--Dserver.servlet.session.timeout=3600"
+ENV JAVA_OPTS=""
 
 EXPOSE ${SERVER_PORT}
 
-CMD java ${JAVA_OPTS} -jar /home/sentinel-dashboard.jar
+CMD ["sh", "-c", "exec java ${JAVA_OPTS} -Dserver.port=\"${SERVER_PORT}\" -Dcsp.sentinel.dashboard.server=\"${DASHBOARD_SERVER}\" -Dsentinel.dashboard.auth.username=\"${DASH_USER}\" -Dsentinel.dashboard.auth.password=\"${DASH_PASS}\" -Dfile.encoding=UTF-8 -Dserver.servlet.session.timeout=3600 -jar /home/sentinel-dashboard.jar"]
