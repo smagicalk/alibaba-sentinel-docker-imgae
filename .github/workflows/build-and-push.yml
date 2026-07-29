@@ -49,7 +49,7 @@ jobs:
           push: true
           build-args: |
             SENTINEL_VERSION=${{ inputs.tag }}
-          tags: ghcr.io/${{ github.repository }}:${{ inputs.tag }}
+          tags: ghcr.io/${{ github.repository_owner }}/alibaba-sentinel:${{ inputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
