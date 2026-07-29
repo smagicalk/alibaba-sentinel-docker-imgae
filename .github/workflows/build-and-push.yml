@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Sentinel version and image tag (for example, 1.8.10)
+        description: Sentinel version and image tag (for example, 1.8.10 or v1.8.10)
         required: true
         type: string
 
@@ -23,13 +23,16 @@ jobs:
           ref: ${{ github.ref_name }}
 
       - name: Update Sentinel version
+        id: version
         env:
-          SENTINEL_VERSION: ${{ inputs.tag }}
+          IMAGE_TAG: ${{ inputs.tag }}
         run: |
-          if [[ ! "${SENTINEL_VERSION}" =~ ^[0-9]+(\.[0-9]+){2}([.-][0-9A-Za-z.-]+)?$ ]]; then
-            echo "Invalid Sentinel version: ${SENTINEL_VERSION}" >&2
+          if [[ ! "${IMAGE_TAG}" =~ ^v?[0-9]+(\.[0-9]+){2}([.-][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid Sentinel version: ${IMAGE_TAG}" >&2
             exit 1
           fi
+          SENTINEL_VERSION="${IMAGE_TAG#v}"
+          echo "sentinel-version=${SENTINEL_VERSION}" >> "${GITHUB_OUTPUT}"
           sed -i "s/^ARG SENTINEL_VERSION=.*/ARG SENTINEL_VERSION=${SENTINEL_VERSION}/" Dockerfile
 
       - name: Set up Docker Buildx
@@ -48,14 +51,14 @@ jobs:
           context: .
           push: true
           build-args: |
-            SENTINEL_VERSION=${{ inputs.tag }}
+            SENTINEL_VERSION=${{ steps.version.outputs.sentinel-version }}
           tags: ghcr.io/${{ github.repository_owner }}/alibaba-sentinel:${{ inputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Commit Dockerfile version
         env:
-          SENTINEL_VERSION: ${{ inputs.tag }}
+          SENTINEL_VERSION: ${{ steps.version.outputs.sentinel-version }}
           TARGET_BRANCH: ${{ github.ref_name }}
         run: |
           if git diff --quiet -- Dockerfile; then
